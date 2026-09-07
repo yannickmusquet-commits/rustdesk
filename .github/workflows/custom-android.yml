@@ -164,6 +164,14 @@ jobs:
           mkdir -p signed-apk; pushd signed-apk
           mv ../rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.apk ./rustdesk-custom-${{ matrix.job.arch }}.apk
 
+      - name: Detect Android build-tools version
+        id: btv
+        run: |
+          BT_DIR="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}/build-tools"
+          VER=$(ls "$BT_DIR" | sort -V | tail -1)
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "Detected build-tools: $VER"
+
       - uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
         name: Sign app APK
         if: env.ANDROID_SIGNING_KEY != null
@@ -175,7 +183,7 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
         env:
-          BUILD_TOOLS_VERSION: "30.0.2"
+          BUILD_TOOLS_VERSION: ${{ steps.btv.outputs.version }}
 
       - name: Upload signed APK artifact
         uses: actions/upload-artifact@v4
