@@ -54,6 +54,13 @@ jobs:
           sed -i 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx6144m -XX:MaxMetaspaceSize=2g/' flutter/android/gradle.properties
           cat flutter/android/gradle.properties
 
+      - name: Bake custom server + public key into config.rs
+        run: |
+          sed -i 's#rs-ny.rustdesk.com#mdm.gidm.fr#g' libs/hbb_common/src/config.rs
+          sed -i 's#RS_PUB_KEY: &str = "[^"]*"#RS_PUB_KEY: \&str = "xjeVGtPYHGxITxUvOyqLlgX2XXUOIwMtqG+PldzW+lU="#' libs/hbb_common/src/config.rs
+          echo "=== config.rs après bake (doit montrer mdm.gidm.fr + ta clé) ==="
+          grep -nE "RENDEZVOUS_SERVERS|RS_PUB_KEY" libs/hbb_common/src/config.rs
+
       - name: Install dependencies
         run: |
           sudo apt-get update
